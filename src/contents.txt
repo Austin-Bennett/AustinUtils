@@ -1,1 +1,5 @@
+Various Cpp and Hpp files
 
+
+if you want to compile the files but have no idea how, install the gnu compiler collection and run this command:
+g++ -shared -g -O3 -std=c++20 -o bin/AustinUtils.dll cppfiles -D AUSTINUTILSEXPORTS -static -static-libgcc -static-libstdc++
