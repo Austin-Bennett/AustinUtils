@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include <chrono>
-#include <windows.h>
 #include "misc.hpp"
 using namespace std::chrono;
 
@@ -27,7 +26,6 @@ class AUSTINUTILS logger {
     };
 
     struct log {
-        std::chrono::time_point<high_resolution_clock> time_stamp;
         LOGTYPE typ;
         std::string message;
     };
