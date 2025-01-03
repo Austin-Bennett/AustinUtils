@@ -122,7 +122,7 @@ You can define custom logging behavior by adding this definition to a class:
 
 # Math utilities
 
-**most of these, as far as I know are not in the cmath header or anywhere in the std library, though im sure im wrong
+**most of these, as far as I know are not in the cmath header or anywhere in the std library, though im sure im wrong**
 
 **Explicit angle types**
 
