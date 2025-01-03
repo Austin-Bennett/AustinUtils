@@ -50,7 +50,7 @@ These will return the underlying value of the argument.
 
 It should be noted that using cast_arg_or for a boolean is pretty much useless, as cast_arg will return false if the argument wasnt passed
 
-The ARG_<type> are used to make casting easy, the code definition is below:
+The ARG_**type** types are used to make casting easy, the code definition is below:
 ```
 using ARG_INT = long long;
 using ARG_UINT = unsigned long long;
