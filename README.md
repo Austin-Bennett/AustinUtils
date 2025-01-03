@@ -141,16 +141,19 @@ concept Arithmetic<T>
 ```
 
 The Iterable requires objects with the .begin() and .end() methods declared, meaning they are iterable with a for-each loop
+
 The Arithmetic concept requires only numerical types (i.e float, double, int, long long, etc)
 
 **Functions**
 
 `AUSTINUTILS double sum(int n, int stop, m_function fn_x)`
 Sums a m_function from n to stop, similar to mathmatical sigma notation
+
 An m_function is just a std::function<double(double)>
 
 `AUSTINUTILS double product(int n, int stop, m_function fn_x)`
 Returns the product of all values of y for each value of x in fn_x from n to stop
+
 Similar to mathmatical **capital** pi notation
 
 ```
@@ -189,6 +192,7 @@ It is a 2D vector that stores an x and y, which can be of any arithmetic type
 | `operator *,/(v2<aT> other)` | returns the product or inverse product between 2 vectors |
 | `operator *,/(aT other)` | returns the product or inverse product between the vector an a number |
 **You can also use the operator= variants for all of these**
+
 **You can explicitly define the type of the vector, but these typedefs are also provided**
 
 ```
@@ -208,7 +212,9 @@ typedef v2<long double> ldvec2;
 ```
 
 **The complex class**
+
 A class for complex numbers
+
 To save me time writing, all the arithmetic operators are defined and work exactly as how they would in actual mathematics, they also can be formmatted to a ostream or logger
 
 | Method | Description |
@@ -233,6 +239,7 @@ You can also raise a complex number to a real power, although in the header, you
 # Other items
 
 `AUSTINUTILS std::vector<std::string> split(std::string s, std::string del = " ")`
+
 **Splits a string at each delimeter string**
 
 
