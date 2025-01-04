@@ -37,7 +37,7 @@ struct AUSTINUTILS argument {
     ArgValue data; //ArgValue is actually a std::any
 };
 ```
-**Finally, cast_arg<T>(argument arg) and cast_arg_or<T>(argument arg, std::type_identity_t<T> or_else):**
+**Finally, `cast_arg<T>(argument arg)` and `cast_arg_or<T>(argument arg, std::type_identity_t<T> or_else)`:**
 
 These will return the underlying value of the argument.
 | Argument Type | Correct usage |
@@ -123,7 +123,6 @@ You can define custom logging behavior by adding this definition to a class:
 
 # Math utilities
 
-**most of these, as far as I know are not in the cmath header or anywhere in the std library, though im sure im wrong**
 
 **Explicit angle types**
 
@@ -134,6 +133,7 @@ typedef double radians;
 These are used in several function definitions to make it clear what kind of angle is expected/returned
 
 **Concepts**
+
 **NOTE: Concepts are a C++20 feature, if you want to use them in your code then, atleast with G++, you need to add the -std=c++20 flag**
 
 ```
@@ -148,11 +148,13 @@ The Arithmetic concept requires only numerical types (i.e float, double, int, lo
 **Functions**
 
 `AUSTINUTILS double sum(int n, int stop, m_function fn_x)`
+
 Sums a m_function from n to stop, similar to mathmatical sigma notation
 
 An m_function is just a std::function<double(double)>
 
 `AUSTINUTILS double product(int n, int stop, m_function fn_x)`
+
 Returns the product of all values of y for each value of x in fn_x from n to stop
 
 Similar to mathmatical **capital** pi notation
@@ -161,6 +163,7 @@ Similar to mathmatical **capital** pi notation
 template<Iterable T>
 AUSTINUTILS double sum(T iterable)
 ```
+
 Sums all the values in a iterable container, provided the values are all arithmetic
 
 ```
@@ -179,8 +182,8 @@ It is a 2D vector that stores an x and y, which can be of any arithmetic type
 | `static v2<T> of(radians theta, double magnitude)` | returns a vector given its angle in radians and magnitude |
 | `static v2<T> of_deg(arcdegrees theta, double magnitude)` | returns a vector given its angle in arcdegrees and magnitude |
 | `static v2<double> from(complex c)` | creates a vector from a complex number |
-| `double length` | returns the length of the vector |
-| `double length2` | returns the square length of the vector |
+| `double length()` | returns the length of the vector |
+| `double length2()` | returns the square length of the vector |
 | `radians direction()` | returns the direction of the vector in radians |
 | `arcdegrees direction_deg()` | returns the direction of the vector in degrees |
 | `v2<T> reversed()` | returns the reversed vector |
@@ -192,6 +195,7 @@ It is a 2D vector that stores an x and y, which can be of any arithmetic type
 | `operator +,-(v2<aT> other)` | returns the sum, or inverse sum between 2 vectors |
 | `operator *,/(v2<aT> other)` | returns the product or inverse product between 2 vectors |
 | `operator *,/(aT other)` | returns the product or inverse product between the vector an a number |
+
 **You can also use the operator= variants for all of these**
 
 **You can explicitly define the type of the vector, but these typedefs are also provided**
@@ -216,7 +220,7 @@ typedef v2<long double> ldvec2;
 
 A class for complex numbers
 
-To save me time writing, all the arithmetic operators are defined and work exactly as how they would in actual mathematics, they also can be formmatted to a ostream or logger
+To save time writing, all the arithmetic operators are defined and work exactly as how they would in actual mathematics, they also can be formmatted to a ostream or logger
 
 | Method | Description |
 |:---:|:---:|
@@ -233,9 +237,13 @@ To save me time writing, all the arithmetic operators are defined and work exact
 | `arcdegrees direction_deg()` | returns the direction of the number in degrees |
 | `T convert_if_real(T* buffer)` | converts the number if it is real and stores it in the buffer |
 
-You can also raise a complex number to a real power, although in the header, you cannot raise a complex to a complex just yet, still working on the math for that
+There is also this pow function for raising complex numbers to real numbers
 
 `AUSTINUTILS complex pow(complex z, double n)`
+
+You may also notice that the following function is defined, but it is not currently implemented
+
+`AUSTINUTILS complex pow(complex z, complex w)`
 
 # Other items
 
