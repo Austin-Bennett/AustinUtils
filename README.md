@@ -1,7 +1,8 @@
 # AustinUtils
 
 **This is a small utilities library with several features**
-**You can get the current version with `const std::string AustinUtilsVersion()`
+
+**You can get the current version with `const std::string AustinUtilsVersion()`**
 
 
 # Argument Parser
