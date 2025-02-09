@@ -28,10 +28,19 @@ enum argument_type {
     FILE_PATH,//like a string, but these arguments will check if the file exists first aswell
 };
 ```
+**The argument_type enum:**
+```
+enum broad_argument_type {
+    NUMERICAL,//floats, ints
+    UNSIGNED_NUMERICAL,//unsigned ints
+    ANY//for anything else (strings, bools, paths)
+};
+```
 **The argument structure:**
 ```
 struct AUSTINUTILS argument {
     std::string key; //the key that the parser will look for (ex; -d, -f, -s --thing)
+    std::string name;//the keys name
     bool required; //whether the parser should expect this argument or not
     argument_type type; //the data type of the argument
     ArgValue data; //ArgValue is actually a std::any
@@ -70,16 +79,18 @@ int main(int argc, char** argv) {
     parser.add_argument("num", "-n", INT);
     parser.add_argument("size", "-s", UINT, false);
     parser.add_argument("pi", "-p", FLOAT);
-    parser.add_argument("name", "-N", STRING, false);
     parser.add_argument("debug", "-d", BOOL);
     parser.add_argument("file", "-f", FILE_PATH, false);
-    
+
+    //the first string not belonging to any other argument will be mapped to this one
+    parser.add_argument("name", "", STRING);
+
     parser.parse_arguments();
 
     argument n = parser.get_argument("num");
     argument s = parser.get_argument("size");
     argument p = parser.get_argument("pi");
-    argument N = parser.get_argument("name");
+    argument Name = parser.get_argument("name");
     argument d = parser.get_argument("debug");
     argument f = parser.get_argument("file");
     
@@ -94,32 +105,15 @@ int main(int argc, char** argv) {
 ```
 
 # Logging
-**To be completly honest these are still somewhat in beta, although not unusable, but in a future update they will be stable, and work correctly 100% of the time**
+Contains a `logger` and a `wlogger` for standard and wide character printing respectivley
 
-**The `logger` object**
-
+Methods:
 | Method | Description |
 |:---:|:---:|
-| logger::logger(std::string identifier) | creates a new logger |
-| void flush() | flushes the internal buffer to stdout |
-| high_resolution_clock::time_point get_log_time_start() | returns the time logging started |
-| logger& operator << (T msg) | logs the message to stdout |
-
-The logger objects print both to stdout and to a file log.txt
-They can print any numerical type you can think of, aswell as char*, const char* and std::string
-If you print a LOGTYPE enum, it will change the mode it prints in
-
-**The LOGTYPE enum**
-```
-enum LOGTYPE {
-    INFO,
-    WARN,
-    ERROR
-};
-```
-The enum is internal to the logger class
-You can define custom logging behavior by adding this definition to a class:
-`friend logger& operator <<(logger& lg, T obj)`
+| `logger(const string& name)` or `wlogger(const wstring& name)` | creates a new logger object with the specified name |
+| `c_log(LOG_TYPE type, const charT *fmt, ...)` | logs a message of type `type` using c-style formmating |
+| `log(LOG_TYPE typ, Args... args)` | logs a message of type `type` where all elements in `args` are printed sequentially with no delimeters |
+| `info, warn, error, debug (Args... args) ` | logs a message where the type depends on the function used, `args` is printed sequentially with no delimeters |
 
 # Math utilities
 
