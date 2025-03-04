@@ -1,200 +1,121 @@
-# AustinUtils
+# Austin Utils
+**A utilities library, with several features**
 
-**This is a small utilities library with several features**
+**Namespace: AustinUtils**
 
-**You can get the current version with `const std::string AustinUtilsVersion()`**
+*You can get the current version using* `AustinUtils::AustinUtilsVersion()` *which will return as a* `AustinUtils::str`
 
 
-# Argument Parser
+# Error
 
-Parsing arguments made easy with an `argument_parser` object.
+**Contains:**
+`class Error : public runtime_error`
+`class Exception : public Error`
 
-| Method | Description |
-|:---:|:---:|
-| `argument_parser::argument_parser(int argc, char** argv)` | Initalizes the argument_parser object |
-| `argument argument_parser::add_argument(std::string name, std::string key, argument_type typ, bool required = true)` | Adds a new argument to the parser |
-| `void argument_parser::parse_arguments()` | parses the arguments in argv |
-| `std::string get_usage()` | returns a string representing the correct usage of a program |
-| `argument get_argument(std::string name)` | returns an argument by its name |
-
-**The argument_type enum:**
+Both classes use the excellent **boost::stacktrace** library to add a stacktrace to regular exceptions
+**Usage:**
 ```
-enum argument_type {
-    INT,//aka long long
-    UINT,//aka unsigned long long
-    FLOAT,//aka long double
-    STRING,
-    BOOL,//these arguments are always non-required, they also take no parameters, their mere existence makes their value true
-    FILE_PATH,//like a string, but these arguments will check if the file exists first aswell
-};
-```
-**The argument_type enum:**
-```
-enum broad_argument_type {
-    NUMERICAL,//floats, ints
-    UNSIGNED_NUMERICAL,//unsigned ints
-    ANY//for anything else (strings, bools, paths)
-};
-```
-**The argument structure:**
-```
-struct AUSTINUTILS argument {
-    std::string key; //the key that the parser will look for (ex; -d, -f, -s --thing)
-    std::string name;//the keys name
-    bool required; //whether the parser should expect this argument or not
-    argument_type type; //the data type of the argument
-    ArgValue data; //ArgValue is actually a std::any
-};
-```
-**Finally, `cast_arg<T>(argument arg)` and `cast_arg_or<T>(argument arg, std::type_identity_t<T> or_else)`:**
+//regular error, throws a simple string message
+throw AustinUtils::Error(const AustinUtils::str& msg)
 
-These will return the underlying value of the argument.
-| Argument Type | Correct usage |
-|:---:|:---:|
-| `INT` | `cast_arg<ARG_INT>(arg), cast_arg_or<ARG_INT>(arg, long long val)` |
-| `UINT` | `cast_arg<ARG_UINT>(arg), cast_arg_or<ARG_UINT>(arg, unsigned long long val)` |
-| `FLOAT` | `cast_arg<ARG_FLOAT>(arg), cast_arg_or<ARG_FLOAT>(arg, long double val)` |
-| `STRING` | `cast_arg<ARG_STRING>(arg), cast_arg_or<ARG_STRING>(arg, std::string val)` |
-| `BOOL` | `cast_arg<ARG_BOOL>(arg), cast_arg_or<ARG_BOOL>(arg, bool val)` |
-| `FILE_PATH` | `cast_arg<ARG_PATH>(arg), cast_arg_or<ARG_PATH>(arg, std::string val)` |
+//throws a formatted error
+throw AustinUtils::Exception(Args... format_args)
 
-It should be noted that using cast_arg_or for a boolean is pretty much useless, as cast_arg will return false if the argument wasnt passed
+//Example
 
-The ARG_**type** types are used to make casting easy, the code definition is below:
-```
-using ARG_INT = long long;
-using ARG_UINT = unsigned long long;
-using ARG_FLOAT = long double;
-using ARG_STRING = std::string;
-using ARG_BOOL = bool;
-using ARG_PATH = std::string;
-```
+throw AustinUtils::Error("Could not find foo");
+/*
+Output:
+terminate called after throwing an instance of 'AustinUtils::Error'
+  what():  Could not find foo
+*stacktrace*
+*/
 
-# Example Usage:
+int index = 4;
+throw AustinUtils::Exception("No foo found at index ", index);
 
-```
-int main(int argc, char** argv) {
-    argument_parser parser(argc, argv);
-    
-    parser.add_argument("num", "-n", INT);
-    parser.add_argument("size", "-s", UINT, false);
-    parser.add_argument("pi", "-p", FLOAT);
-    parser.add_argument("debug", "-d", BOOL);
-    parser.add_argument("file", "-f", FILE_PATH, false);
-
-    //the first string not belonging to any other argument will be mapped to this one
-    parser.add_argument("name", "", STRING);
-
-    parser.parse_arguments();
-
-    argument n = parser.get_argument("num");
-    argument s = parser.get_argument("size");
-    argument p = parser.get_argument("pi");
-    argument Name = parser.get_argument("name");
-    argument d = parser.get_argument("debug");
-    argument f = parser.get_argument("file");
-    
-    cout << cast_arg_or<ARG_INT>(n, 0) << "\n";
-    cout << cast_arg_or<ARG_UINT>(s, 0) << "\n";
-    cout << cast_arg_or<ARG_FLOAT>(p, 0.0) << "\n";
-    cout << cast_arg_or<ARG_STRING>(N, "") << "\n";
-    cout << cast_arg<ARG_BOOL>(d) << "\n";
-    cout << cast_arg_or<ARG_PATH>(f, "log.txt") << "\n";
-    
-}
+/*
+Output:
+terminate called after throwing an instance of 'AustinUtils::Exception'
+  what():  No foo found at index 4
+*stacktrace*
+*/
 ```
 
 # Logging
-Contains a `logger` and a `wlogger` for standard and wide character printing respectivley
 
-Methods:
+**Contains:**
+```
+enum LOG_TYPE {
+    LOG_INFO,
+    LOG_WARN,
+    LOG_ERROR,
+    LOG_DEBUG
+}
+std::string LogTypeToString(LOG_TYPE typ)
+std::wstring LogTypeToWString(LOG_TYPE typ)
+class logger
+class wlogger
+```
+
+`wlogger` **is a version of** `logger` **but uses wide strings, otherwise, both have exactly the same methods**
+
+**string_type means either std::wstring or std::string depending on which logger object you use**
+
+**char_type means either char*** **or** **wchar_t*** **depending on the logger object used**
+
 | Method | Description |
 |:---:|:---:|
-| `logger(const string& name)` or `wlogger(const wstring& name)` | creates a new logger object with the specified name |
-| `c_log(LOG_TYPE type, const charT *fmt, ...)` | logs a message of type `type` using c-style formmating |
-| `log(LOG_TYPE typ, Args... args)` | logs a message of type `type` where all elements in `args` are printed sequentially with no delimeters |
-| `info, warn, error, debug (Args... args) ` | logs a message where the type depends on the function used, `args` is printed sequentially with no delimeters |
+| `logger(const string_type& name)` | creates a new logger object with the name `name` |
+| `void c_log(LOG_TYPE type, const char_type fmt, ...)` | logs a new message using c-style formatting in the form `"[LOG_TYPE][name]: message"` |
+| `void c_log(LOG_TYPE type, const char_type fmt, va_list args)` | logs a new message using c-style formatting with a va_list in the form `"[LOG_TYPE][name]: message"` |
+| `void log(LOG_TYPE typ, Args... args)` | logs a new message in the form: `"[LOG_TYPE][name]: message"` |
+| `void info(Args... args)` | logs a new message in the form `"[INFO][name]: message"` |
+| `void warn(Args... args)` | logs a new message in the form `"[WARN][name]: message"` |
+| `void error(Args... args)` | logs a new message in the form `"[ERROR][name]: message"` |
+| `void debug(Args... args)` | logs a new message in the form `"[DEBUG][name]: message"` |
 
-# Math utilities
+# Math
 
-
-**Explicit angle types**
-
+**Contains:**
 ```
-typedef double arcdegrees;
-typedef double radians;
-```
-These are used in several function definitions to make it clear what kind of angle is expected/returned
+//for distinguishing between angle types
+typedef double arcdegrees
+typedef double radians
 
-**Concepts**
+//describes any numerical type
+concept Arithmetic
 
-**NOTE: Concepts are a C++20 feature, if you want to use them in your code then, atleast with G++, you need to add the -std=c++20 flag**
+//describes any integer type signed or unsigned
+concept Integral
 
-```
-concept Iterable<T>
-concept Arithmetic<T>
-```
+//describes any floating-point number
+concept FloatingPoint
 
-The Iterable requires objects with the .begin() and .end() methods declared, meaning they are iterable with a for-each loop
+//describes any unsigned integer
+concept Unsigned
 
-The Arithmetic concept requires only numerical types (i.e float, double, int, long long, etc)
+//to be used anywhere a function that can be called in the form f(x) -> y is need
+typedef std::function<double(double)> m_function
 
-**Functions**
+//simliar to mathmatical sigma notation 
+double sum(int n, int stop, m_function fn_x);
+//similar to mathmatical capital pi notation
+double product(int n, int stop, m_function fn_x);
+//converts radians to degrees
+arcdegrees toDeg(radians theta);
+//convertes degrees to radians
+radians toRad(arcdegrees theta);
 
-`AUSTINUTILS double sum(int n, int stop, m_function fn_x)`
+//sums all the numbers in the iterable
+double sum(T iterable)
 
-Sums a m_function from n to stop, similar to mathmatical sigma notation
+//computes the product of all numbers in the iterable
+double product(T iterable)
 
-An m_function is just a std::function<double(double)>
+template<Arithmetic T>
+struct v2;
 
-`AUSTINUTILS double product(int n, int stop, m_function fn_x)`
-
-Returns the product of all values of y for each value of x in fn_x from n to stop
-
-Similar to mathmatical **capital** pi notation
-
-```
-template<Iterable T>
-AUSTINUTILS double sum(T iterable)
-```
-
-Sums all the values in a iterable container, provided the values are all arithmetic
-
-```
-template<Iterable T>
-AUSTINUTILS double product(T iterable)
-```
-
-Returns the product between 1 and all the numbers in the iterable
-
-**The `v2<Arithmetic T>` structure, or vector2**
-
-It is a 2D vector that stores an x and y, which can be of any arithmetic type
-
-| Method | Description |
-| :---: | :---: |
-| `static v2<T> of(radians theta, double magnitude)` | returns a vector given its angle in radians and magnitude |
-| `static v2<T> of_deg(arcdegrees theta, double magnitude)` | returns a vector given its angle in arcdegrees and magnitude |
-| `static v2<double> from(complex c)` | creates a vector from a complex number |
-| `double length()` | returns the length of the vector |
-| `double length2()` | returns the square length of the vector |
-| `radians direction()` | returns the direction of the vector in radians |
-| `arcdegrees direction_deg()` | returns the direction of the vector in degrees |
-| `v2<T> reversed()` | returns the reversed vector |
-| `v2<T> normalized()` | returns the vector normalized, i.e with the same direction but with length 1 |
-| `friend std::ostream& operator <<(std::ostream& os, v2<T> self)` | outputs the vector to the std::ostream |
-| `friend logger& operator << (logger& lg, v2<T> self)` | outputs the vector to a logger |
-| `template<Arithmetic aT> v2<aT> convert_data()` | converts the vector to a vector of type aT |
-| `double dot(v2<aT> other)` | returns the dot product between the 2 vectors |
-| `operator +,-(v2<aT> other)` | returns the sum, or inverse sum between 2 vectors |
-| `operator *,/(v2<aT> other)` | returns the product or inverse product between 2 vectors |
-| `operator *,/(aT other)` | returns the product or inverse product between the vector an a number |
-
-**You can also use the operator= variants for all of these**
-
-**You can explicitly define the type of the vector, but these typedefs are also provided**
-
-```
 typedef v2<unsigned short> usvec2;
 typedef v2<unsigned int> uvec2;
 typedef v2<unsigned long> ulvec2;
@@ -208,49 +129,228 @@ typedef v2<long long> llvec2;
 typedef v2<float> fvec2;
 typedef v2<double> dvec2;
 typedef v2<long double> ldvec2;
+
+class complex
+
+//computes the complex number z to the real power n
+complex pow(complex z, double n)
+//NOT IMPLEMENTED, DO NOT USE
+complex pow(complex z, complex w)
+
+template<Arithmetic T>
+struct matrix;
 ```
 
-**The complex class**
+**The following method lists for classes do not contain operators, but the operators are defined as is generally accepted by the mathematical community**
 
-A class for complex numbers
-
-To save time writing, all the arithmetic operators are defined and work exactly as how they would in actual mathematics, they also can be formmatted to a ostream or logger
-
+**struct v2<T>**
 | Method | Description |
-|:---:|:---:|
-| `complex()` | creates the complex number 0 + 0i |
-| `complex(double real)` | creates the complex number real + 0i |
+| :---: | :---: |
+| `static v2<T> of[_deg](angle_type theta, double magnitude)` | creates a vector from an angle and a magnitude |
+| `static v2<T> from(complex c)` | creates a vector from a complex number |
+| `double length()` | returns the length of the vector |
+| `double length2()` | returns the length squared of the vector |
+| `angle_type direction[_deg]()` | returns the vectors direction using the angle_type |
+| `v2<T> reversed` | returns a reversed version of the vector |
+| `v2<T> normalized()` | returns a vector of length 1 |
+| `friend std::ostream& operator << (std::ostream& os, v2<T> self` | formats the vector to a output stream in the form <x, y> |
+| `v2<aT> convert_data()` | converts the vectors data to a new arithmetic type |
+| `double dot(v2<aT> other)` | computes the dot product between the `this` and `other` vectors |
+
+
+**Note: Massive overhaul coming for this class as it lwk sucks**
+**class complex**
+| `complex()` | creates the complex number 0+0i  |
+| `complex(double real)` | creates the complex number real+0i |
 | `complex(double real, double imaginary)` | creates the complex number real + imaginary*i |
-| `double a()` | returns the real part of the number |
-| `double b()` | returns the imaginary part of the number |
-| `complex conjugate()` | returns the conjugate of the number |
-| `bool is_real()` | returns if the complex number is a real number |
-| `double magnitude()` | returns the magnitude of the complex vector |
-| `double magnitude2()` | returns the magnitude of the complex vector squared |
-| `radians direction()` | returns the direction of the number in radians |
-| `arcdegrees direction_deg()` | returns the direction of the number in degrees |
-| `T convert_if_real(T* buffer)` | converts the number if it is real and stores it in the buffer |
-
-There is also this pow function for raising complex numbers to real numbers
-
-`AUSTINUTILS complex pow(complex z, double n)`
-
-You may also notice that the following function is defined, but it is not currently implemented
-
-`AUSTINUTILS complex pow(complex z, complex w)`
-
-# Other items
-
-`AUSTINUTILS std::vector<std::string> split(std::string s, std::string del = " ")`
-
-**Splits a string at each delimeter string**
+| `complex conjugate()` | returns the conjugate of the complex number |
+| `bool is_real()` | returns if the complex number is real |
+| `double magnitude()` | returns its length |
+| `double magnitude2()` | returns its length squared |
+| `angle_type direction[_deg]` | returns the direction of the complex number |
+| `void convert_if_real(T* buffer)` | if the complex number is real it stores it in the buffer, otherwise it doesnt |
+| `friend std::ostream& operator << (std::ostream& os, complex self` | formats the complex number to the output stream in the form a +/- bi |
 
 
+**struct matrix<T>**
+| `virtual ~matrix()` | deallocates the matrix |
+| `usize width() const` | returns the number of columns in the matrix |
+| `usize height() const` | returnst the number of rows in the matrix |
+| `matrix(std::initalizer_list<std::initalizer_list<T>> matrix)` | creates a matrix from the initalizer list matrix |
+| `matrix(usize rows, usize columns, T default_value = 0)` | creates a `rows*columns` matrix with all values set to `default value` |
+| copy and move constructors and operators | copies/moves the matrix |
+| `matrix(iT start, iT end, usize rows, usize columns)` | creates a matrix `rows*columns` and uses the iterator values from start to end for the matrix |
+| iteration methods | used for iterating |
+| `operator [usize i]` | returns an array at the row index i |
+
+# Str
+
+**
+I dont like the standard library string, so I made this one, with support for appending more than just strings, it has (almost) all the functionality from std::string too so almost 0 compromise using it, and even more
+features will be added soon, including a wstr type for wide characters
+**
+
+**Contains:**
+```
+//describes any object with a method of signature str toStr()
+concept Stringifieable
+
+class str
+
+//defines appending a c-string to a string
+str operator + (const char* cs, str& s)
+
+int stoi(str&s)
+long stol(str&s)
+long long stoll(str&s)
+unsigned int stou(str&s)
+unsigned long stoul(str&s)
+unsigned long long stoull(str&s)
+float stof(str&s)
+double stod(str&s)
+long double stold(str&s)
+//hash function for use as a key in std::unordered_map
+struct std::hash<AustinUtils::str>
+//getline function for the str class
+std::istream& getline(std::istream& is, AustinUtils::str& s, char delim = '\n')
+```
+
+**class str**
+
+| Methods | Description |
+| :---: | :---: |
+| `virtual ~str()` | deallocates the string |
+| `str()` | creates an empty string |
+| `str(const char* c_str)` | creates a string from the c-style string |
+| `str(char c, usize count)` | creates a string with `count` number of `c` |
+| `str(const std::string& s)` | creates a str from a C++ std::string |
+| Move and copy operators and constructors | Copies/Moves a str object |
+| `usize len()` | returns the length of the string |
+| `usize max_size()` | returns the current maximum capacity of the string |
+| `void resize(usize new_size)` | resizes the strings internal array |
+| `void clear()` | clears the entire string |
+| `bool empty()` | returns if the string is empty or not |
+| `void shrink_to_fit()` | resizes the string to be just big enough to contain everything up to its null char |
+| `char& at(const usize index) const` | returns the char at the index |
+| `char& operator [const usize index]` | returns the char at the index |
+| `char& back() const` | returns the char at the back |
+| `char& front() const` | returns the char at the front |
+| `friend std::ostream& operator<<(std::ostream& os, const str& self)` | outputs the string to the stream |
+| `void append(const str& s)` | appends the string to the end of the string |
+| `void append(const char* s)` | appends the c-string to the end of the string |
+| `void append(std::string s)` | appends the C++ std::string to the end of the string |
+| `void append(T x)` | appends the number to the end of the string |
+| `void append(T& x)` | appends any Stringifieable object to the end of the string |
+| `str& operator +=(T x)` | appends any object that can be appended to the end of the string |
+| `str operator+(T x)` | returns a string formed by appending the current string to anything that can be appended |
+| `explicit operator std::string() const` | returns the str as a std::string |
+| `insert(const str& s, usize pos)` | inserts a str at any valid position |
+| `insert(T x, usize pos)` | inserts any valid object or type that can be converted to a string through appendation |
+| `void erase(usize start, usize n = npos)` | erases all chars from `start` to `min(n, len())` |
+| `void replace(str& s, usize start, usize len)` | replaces a range of characters with `s` |
+| `void replace(T x, usize start, usize len)` | replace a range with any object that can be converted to a str |
+| `void swap(str&)` | swaps the 2 strings by moving them |
+| `void pop_back()` | pops the last character |
+| `std::string stdString()` | returns the std::string representation of the str |
+| `const char* data()` | returns the internal char buffer array |
+| `char* c_str()` | returns a newly allocated c-string representing value of the str |
+| `void copy(char* buf, usize begin, usize n = npos)` | copies chars from `begin` to `min(n, len())` |
+| `usize find(str s, usize begin = 0, usize end = npos)` | finds the first occurence of s in the string |
+| `usize rfind(str s, usize begin = 0, usize end = npos)` | finds the last occurence of s in the string |
+| `str substr(usize start, usize n = npos)` | returns a substring from `start` to `min(n, len())` |
+| `i64 compare(const string_type s)` | returns a comparison between the 2 strings, 0 if they are equal |
+| comparison operators (==, !=, > etc | returns booleans depending on the result of compare between the string and the other string |
+| `static void swap(str& s1, str& s2)` | swaps the 2 strings values |
+| `friend std::istream& operator >>(std::istream& is, str& s)` | gets a string from an input stream |
+| iterator functions | used for iterating through the string |
+
+**stox functions**
+Convert a str object into any numerical type
+
+**Hash Function**
+allows the str to be used as a key for std::unordered_map and other standard library objects requiring the hash
+
+**getline(std::istream is, AustinUtils::str& s, char delim = '\n')**
+Retrieves a line from the input stream and stores in s
 
 
+# Miscellaneous
 
+**Contains:**
+```
+//describes anything that can be iterated through
+concept Iterable
 
+//anything formattable to a string
+concept Formattable
 
+//anything formattable to a wstring
+concept WideFormattable
+
+//splits a string into several substrings delimmeted by del
+std::vector<std::string split(std::string s, std::string del = " ")>
+
+//formats args into a string
+std::string fmt(Args... args)
+
+//formats args into a wstring
+std::wstring wfmt(Args... args)
+
+//formats any iterable to an output stream
+std::ostream& operator <<(std::ostream& os, const T& vec)
+
+const static UINT og_console_CP = GetConsoleCP();
+
+//sets the console up for printing wstrings or back to regular strings
+void SetConsoleUTFMode(const bool value)
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+typedef int8_t i8;
+typedef int16_t i16;
+typedef int32_t i32;
+typedef int64_t i64;
+
+typedef size_t usize;
+
+typedef wchar_t wchar;
+
+#ifdef WIN64
+    typedef float f32;
+    typedef double f64;
+    typedef long double f80;
+#elifdef WIN32
+    typedef float f32
+#endif
+
+    #define null nullptr
+    
+    //cast macro for all those static casts
+    #define cast(x, T) (static_cast<T>(x))
+    
+    //NODISCARD is just a macro wrapper for [[nodiscard]]
+    #define NODISCARD [[nodiscard]]
+    
+    //returns the maximum value of a type T
+    #define T_MAX(T) (std::numeric_limits<T>::max())
+    #define T_MIN(T) (std::numeric_limits<T>::min())
+    
+    //i like this rust keyword
+    #define loop while(true)
+
+//an RAM iterator that wraps a pointer
+class basic_random_access_iterator
+
+//a forward iterator wrapping a pointer
+class basic_iterator
+
+//a backwards iterator wrapping a pointer
+class basic_reverse_iterator
+
+```
 
 
 
