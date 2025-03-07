@@ -160,6 +160,8 @@ struct matrix;
 
 **Note: Massive overhaul coming for this class as it lwk sucks**
 **class complex**
+| Method | Description |
+| :---: | :---: |
 | `complex()` | creates the complex number 0+0i  |
 | `complex(double real)` | creates the complex number real+0i |
 | `complex(double real, double imaginary)` | creates the complex number real + imaginary*i |
@@ -173,6 +175,8 @@ struct matrix;
 
 
 **struct matrix<T>**
+| Method | Description |
+| :---: | :---: |
 | `virtual ~matrix()` | deallocates the matrix |
 | `usize width() const` | returns the number of columns in the matrix |
 | `usize height() const` | returnst the number of rows in the matrix |
