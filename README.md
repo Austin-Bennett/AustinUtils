@@ -201,21 +201,6 @@ struct matrix;
 | `v3& rotate[_deg](v3 rotator, v3 center = {0, 0, 0)` | rotates the vector around `center` |
 
 
-**class complex**
-| Method | Description |
-| :---: | :---: |
-| `complex()` | creates the complex number 0+0i  |
-| `complex(double real)` | creates the complex number real+0i |
-| `complex(double real, double imaginary)` | creates the complex number real + imaginary*i |
-| `complex conjugate()` | returns the conjugate of the complex number |
-| `bool is_real()` | returns if the complex number is real |
-| `double magnitude()` | returns its length |
-| `double magnitude2()` | returns its length squared |
-| `angle_type direction[_deg]` | returns the direction of the complex number |
-| `void convert_if_real(T* buffer)` | if the complex number is real it stores it in the buffer, otherwise it doesnt |
-| `friend std::ostream& operator << (std::ostream& os, complex self` | formats the complex number to the output stream in the form a +/- bi |
-
-
 **struct matrix<T>**
 | Method | Description |
 | :---: | :---: |
@@ -242,6 +227,8 @@ concept Stringifieable
 
 class str
 
+//operator for converting a c-string into a str
+str operator ""_str(const char* cs, usize);
 //defines appending a c-string to a string
 str operator + (const char* cs, str& s)
 
@@ -269,6 +256,12 @@ std::istream& getline(std::istream& is, AustinUtils::str& s, char delim = '\n')
 | `str(const char* c_str)` | creates a string from the c-style string |
 | `str(char c, usize count)` | creates a string with `count` number of `c` |
 | `str(const std::string& s)` | creates a str from a C++ std::string |
+| `str(const str& s, usize start, usize len = npos)` | creates a string from a substring |
+| `str(const char* c_str, usize n)` | creates a string from the first `n` chars of `c_str` |
+| `str(iterator begin, iterator end)` | creates a string from an iterator |
+| `str(initalizer_list<char> il)` | creates a string from a initalizer array |
+| `explicit str(T x)` | creates a string by converting x into a string |
+| `assign(...)` | assigns the strings value, uses the same arguments as any constructor except the default constructor |
 | Move and copy operators and constructors | Copies/Moves a str object |
 | `usize len()` | returns the length of the string |
 | `usize max_size()` | returns the current maximum capacity of the string |
@@ -342,7 +335,6 @@ std::swap(list_node<T>* n1, list_node<T>* n2)
 std::swap(list_node<T>& n1, list_node<T>& n2)
 ```
 
-**Note:** *In a future update, list_node will support custom allocators, however I cant think of a good way to do so. For now use `new` when creating a new list_node*
 
 **struct list_node**
 
@@ -457,6 +449,14 @@ class basic_iterator
 class basic_reverse_iterator
 
 ```
+#In the future
 
+**Coming in a future update:**
+- `class wstr` for wide strings
+- Support for every function in std::string inside str
 
+**Ideas that may come in a future update**
+- Custom allocator support for AustinUtils::list_node
 
+**Ideas that I have, but wont necessarily be added**
+- `class container<T>` a container class that can use any data structure for storing `T`, could be an array structure, a linked list structure, or a bucket structure
