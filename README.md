@@ -116,19 +116,35 @@ double product(T iterable)
 template<Arithmetic T>
 struct v2;
 
-typedef v2<unsigned short> usvec2;
-typedef v2<unsigned int> uvec2;
-typedef v2<unsigned long> ulvec2;
-typedef v2<unsigned long long> ullvec2;
+typedef v2<u8> ubvec2;//unsigned byte vector 2
+typedef v2<u16> usvec2;//unsigned short vector 2
+typedef v2<u32> uvec2;//unsigned vector 2
+typedef v2<u64> ullvec2;//unsigned long long vector 2
 
-typedef v2<short> svec2;
-typedef v2<int> ivec2;
-typedef v2<long> lvec2;
-typedef v2<long long> llvec2;
+typedef v2<i8> bvec2;//byte vector 2
+typedef v2<i16> svec2;//short vector 2
+typedef v2<i32> ivec2;//integer vector 2
+typedef v2<i64> llvec2;//long long vector 2
 
-typedef v2<float> fvec2;
-typedef v2<double> dvec2;
-typedef v2<long double> ldvec2;
+typedef v2<float> fvec2;//float vector 2
+typedef v2<double> dvec2;//double vector 2
+typedef v2<long double> ldvec2;//long double vector 2
+
+struct v3 : public v2;
+
+typedef v3<i8> bvec3;
+typedef v3<i16> svec3;
+typedef v3<i32> ivec3;
+typedef v3<i64> llvec3;
+
+typedef v3<u8> ubvec3;
+typedef v3<u16> usvec3;
+typedef v3<u32> uvec3;
+typedef v3<u64> ullvec3;
+
+typedef v3<float> fvec3;
+typedef v3<double> dvec3;
+typedef v3<long double> ldvec3;
 
 class complex
 
@@ -141,7 +157,7 @@ template<Arithmetic T>
 struct matrix;
 ```
 
-**The following method lists for classes do not contain operators, but the operators are defined as is generally accepted by the mathematical community**
+**The following method lists for classes do not contain operators, but the operators are defined functionally the same as is the general functional definition accepted by the mathematical community**
 
 **struct v2<T>**
 | Method | Description |
@@ -152,13 +168,39 @@ struct matrix;
 | `double length2()` | returns the length squared of the vector |
 | `angle_type direction[_deg]()` | returns the vectors direction using the angle_type |
 | `v2<T> reversed` | returns a reversed version of the vector |
+| `v2<T> reverse` | reverses the vecotr |
 | `v2<T> normalized()` | returns a vector of length 1 |
+| `v2<T> normalize` | normalizes the vector |
 | `friend std::ostream& operator << (std::ostream& os, v2<T> self` | formats the vector to a output stream in the form <x, y> |
 | `v2<aT> convert_data()` | converts the vectors data to a new arithmetic type |
 | `double dot(v2<aT> other)` | computes the dot product between the `this` and `other` vectors |
+| `v2 rotated[_deg](angle_type theta, v2 center = {0, 0})` | returns a version of the vector rotated, around the point `center`, by theta |
+| `v2& rotate[_deg](angle theta, v2 center = {0, 0})` | rotates the vector, around the point `center`, by theta |
 
 
-**Note: Massive overhaul coming for this class as it lwk sucks**
+**struct v3<T>**
+| Method | Description |
+| :---: | :---: |
+| `static v2<T> of[_deg](T magnitude, angle xrot, angle yrot, angle zrot)` | creates a vector from a magnitude, and its rotation in 3D space |
+| `static v2<T> of[_deg](T magnitude, v3<angle>)` | creates a vector from a magnitude and its rotation in 3D space |
+| `T length()` | returns the length of the vector |
+| `T length2()` | returns the length squared of the vector |
+| `v3<angle> direction[_deg]()` | returns the vectors direction using the angle_type |
+| `v3<T> reversed` | returns a reversed version of the vector |
+| `v3<T> normalized()` | returns a vector of length 1 |
+| `v3<T> reverse` | reverses the vector |
+| `v3<T> normalize()` | normalizes the vector |
+| `friend std::ostream& operator << (std::ostream& os, v2<T> self` | formats the vector to a output stream in the form <x, y> |
+| `v3<aT> convert_data()` | converts the vectors data to a new arithmetic type |
+| `T dot(v3<aT> other)` | computes the dot product between the `this` and the `other` vector |
+| `v3 crossed(const v3& other)` | returns the cross product between `this` and the `other` vector |
+| `v3& crossed(const v3& other)` | returns the cross product between `this` and the `other` vector |
+| `v3 rotated[_deg](angle xrot, angle yrot, angle zrot, v3 center = {0, 0, 0})` | returns a new vector rotated around `center` using the rotation values |
+| `v3 rotated[_deg](v3<angle> rotator, v3 center = {0, 0, 0})` | returns a new vector rotated around `center` using the rotation values |
+| `v3& rotate[_deg](angle xrot, angle yrot, angle zrot, v3 center = {0, 0, 0)` | rotates the vector around `center` |
+| `v3& rotate[_deg](v3 rotator, v3 center = {0, 0, 0)` | rotates the vector around `center` |
+
+
 **class complex**
 | Method | Description |
 | :---: | :---: |
@@ -189,10 +231,9 @@ struct matrix;
 
 # Str
 
-**
-I dont like the standard library string, so I made this one, with support for appending more than just strings, it has (almost) all the functionality from std::string too so almost 0 compromise using it, and even more
-features will be added soon, including a wstr type for wide characters
-**
+**I dont like the standard library string, so I made this one, with support for appending more than just strings, and lots more modifier methods, 
+it has (almost) all the functionality from std::string too meaning there is almost 0 compromise to using it, and even more
+features will be added soon, including a wstr type for wide characters**
 
 **Contains:**
 ```
@@ -263,9 +304,23 @@ std::istream& getline(std::istream& is, AustinUtils::str& s, char delim = '\n')
 | `usize rfind(str s, usize begin = 0, usize end = npos)` | finds the last occurence of s in the string |
 | `str substr(usize start, usize n = npos)` | returns a substring from `start` to `min(n, len())` |
 | `i64 compare(const string_type s)` | returns a comparison between the 2 strings, 0 if they are equal |
-| comparison operators (==, !=, > etc | returns booleans depending on the result of compare between the string and the other string |
+| comparison operators (`==`, `!=`, `>` etc) | returns booleans depending on the result of compare between the string and the other string |
 | `static void swap(str& s1, str& s2)` | swaps the 2 strings values |
 | `friend std::istream& operator >>(std::istream& is, str& s)` | gets a string from an input stream |
+| `str capitalized()` | returns a copy of the string where the first alphabetical char is made uppercase and the rest are made lowercase |
+| `str& capitalized()` | capitalized the string |
+| `str uppercase()` | returns a copy where all alphabetical chars are in uppercase |
+| `str& toUppercase()` | makes the string all uppercase |
+| `str lowercase()` | returns a version of the string where all alphabetical chars are in lowercase |
+| `str& toLowercase()` | makes the string all lowercase |
+| `usize count(const str& s)` | counts the number of occurences of `s` in the string |
+| `bool endswith(const str& suffix)` | returns true if the string ends with `suffix` |
+| `bool startswith(const str& prefix)` | returns true if the string starts with prefix |
+| `str format(...)` | uses the string and the arguments in .format() to format the string using c-style formmating |
+| `std::vector<str> split(const str& delimiter - " ", usize max = npos)` | splits the string up to `max` substring split at `delimiter` |
+| `str& removeWhitespace()` | removes all whitespace from the string |
+| `str& fill(char c, usize count)` | fills the beginning of the string with `count` copies of `c` |
+| `str& rfill(char c, usize count)` | fills the back of the string with `count` copies of `c` |
 | iterator functions | used for iterating through the string |
 
 **stox functions**
@@ -277,6 +332,53 @@ allows the str to be used as a key for std::unordered_map and other standard lib
 **getline(std::istream is, AustinUtils::str& s, char delim = '\n')**
 Retrieves a line from the input stream and stores in s
 
+# linkedlist
+
+**Contains:**
+```
+list_node<T>
+
+std::swap(list_node<T>* n1, list_node<T>* n2)
+std::swap(list_node<T>& n1, list_node<T>& n2)
+```
+
+**Note:** *In a future update, list_node will support custom allocators, however I cant think of a good way to do so. For now use `new` when creating a new list_node*
+
+**struct list_node**
+
+**`list_node` is a doubly-linked linked list node**
+
+| Methods | Description |
+| :---: | :---: |
+| `void push_forward(T x)` | creates a new node with value x and inserts it between `this` and `next` |
+| `void push_backward(T x)` | creates a bew bide with value x and inserts it between `prev` and `next` |
+| `list_node<T>* erase_and_advanc()` | erases the `this` node and returns the next pointer |
+| `list_node<T>* erase_and_retreat()` | erases the `this` node and returns the prev pointer |
+| `void erase_forward()` | erases the `next` node |
+| `void erase_backward()` | erases the `prev` node |
+| `void deallocate()` | destroys all nodes in the list, you must call this method when finished with the list as the destructor only destroys the `this` node |
+| `std::ostream& operator <<(std::ostream& os, list_node<U>& self)` | formats the list to an output stream |
+| `list_node<T>* goToEnd()` | returns the last allocated node in the list |
+| `list_node<T>* goToBeginning()` | returns the first allocated node in the list |
+| `iterator begin()` | returns an iterator point from `this` towards the end of the list |
+| `iterator end()` | returns an iterator pointing to nullptr, since that is technically the end of the list |
+| `riterator rbegin()` | returns an iterator pointing from `this` towards the beginning of the list |
+| `riterator rend()` | returns a reverse iterator to nullptr, as this is technically the very start of the list aswell |
+| `void swap(list_node& other)` | swaps the 2 nodes by swapping their `prev` and `next` pointers |
+| `void swap(list_node* other)` | swaps the 2 nodes by swapping their `prev` and `next` pointers |
+
+**Example linked list formatting**
+```
+list_node<int>* ilist = new list_node<int>({1, 2, 3, 4, 5});
+ilist = ilist->next->next;
+cout << ilist->x << "\n";
+cout << ilist << "\n";
+```
+**Output:**
+```
+3
+1 <- 2 <- 3 -> 4 -> 5
+```
 
 # Miscellaneous
 
