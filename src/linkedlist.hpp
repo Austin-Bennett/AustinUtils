@@ -12,6 +12,11 @@ struct AUSTINUTILS list_node {
     list_node<T>* prev = nullptr;
     T x;
 
+    using value_type = T;
+    using reference = T&;
+    using const_reference = const T&;
+
+
     list_node() : x(T()) {}
     list_node(T x) : x(x) {}
     list_node(T x, list_node<T>* prev) : prev(prev), x(x) {}
@@ -57,6 +62,30 @@ struct AUSTINUTILS list_node {
         next = other.next;
         other.prev = nullptr;
         other.next = nullptr;
+    }
+
+    void insert_forward(list_node<T>* ptr) {
+        if (ptr == nullptr) {
+            throw AustinUtils::Exception("Cannot insert a nullptr");
+        }
+        if (next) {
+            next->prev = ptr;
+        }
+        ptr->next = next;
+        ptr->prev = this;
+        next = ptr;
+    }
+
+    void insert_backward(list_node<T>* ptr) {
+        if (ptr == nullptr) {
+            throw AustinUtils::Exception("Cannot insert a nullptr");
+        }
+        if (prev) {
+            prev->next = ptr;
+        }
+        ptr->prev = prev;
+        ptr->next = this;
+        prev = ptr;
     }
 
     void push_forward(T x) {

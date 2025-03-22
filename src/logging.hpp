@@ -27,6 +27,8 @@ namespace AustinUtils {
 
         public:
 
+        logger() = default;
+
         explicit logger(const std::string& name);
 
         void c_log(LOG_TYPE type, const char *fmt, ...);

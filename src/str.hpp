@@ -5,7 +5,6 @@
 #include <cstring>
 #include <iomanip>
 
-#include "Error.hpp"
 
 //create a better string than the c++ string, with support for java-like string stuff
 
@@ -52,7 +51,9 @@ namespace AustinUtils {
         virtual ~str();
 
 
-
+        using value_type = char;
+        using reference = char&;
+        using const_reference = const char&;
 
         /*
          * Creates string of 0 length
@@ -87,7 +88,11 @@ namespace AustinUtils {
 
             msize = slength+5;
             cstr = new char[msize];
-            std::copy(begin, end, cstr);
+
+            for (usize i = 0; begin != end; ++begin) {
+                cstr[i] = static_cast<char>(*begin);
+                i++;
+            }
             cstr[slength] = '\0';
         }
 
@@ -110,7 +115,7 @@ namespace AustinUtils {
          */
         str(const str& s);
 
-        template<typename T>
+        template<typename T, typename = std::enable_if_t<!std::is_floating_point_v<T>>>
         explicit str(T x) {
             str s;
             s.append(x);
@@ -232,6 +237,22 @@ namespace AustinUtils {
         template<Integral T>
         void append(T x) {
             append(std::to_string(x));
+        }
+
+
+        void append(void* x) {
+            if (x == nullptr) {
+                append("null");
+                return;
+            }
+            usize needed = snprintf(null, 0, "%p", x);
+
+            auto buffer = new char[needed+1];
+            snprintf(buffer, needed+1, "%p", x);
+            append("0x");
+            append(buffer);
+            delete[] buffer;
+            return;
         }
 
         template<FloatingPoint T>
@@ -381,8 +402,6 @@ namespace AustinUtils {
         NODISCARD i64 compare(const str &s) const;
         NODISCARD i64 compare(const std::string& s) const;
         NODISCARD i64 compare(const char* s) const;
-
-
         NODISCARD i64 compare(const str& s, usize start, usize n = npos) const;
 
         bool operator ==(str other) const;
@@ -409,12 +428,15 @@ namespace AustinUtils {
         [[nodiscard]] reverse_iterator rend() const {
             return reverse_iterator(cstr-1);
         }
-
-
     };
 
+    class wstr;
 
-
+    template<typename T>
+    concept WStringifieable = requires(T t)
+    {
+        {t.toWStr()} -> std::same_as<wstr>;
+    };
 
 
     NODISCARD extern AUSTINUTILS str operator ""_str(const char* cs, usize);

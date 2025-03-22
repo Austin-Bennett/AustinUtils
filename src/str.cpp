@@ -1,4 +1,7 @@
 #include "str.hpp"
+
+#include <cstdarg>
+
 #include "Error.hpp"
 
 
@@ -101,12 +104,10 @@ namespace AustinUtils {
         if (start >= s.len()) {
             throw Exception("Cannot access element at index ", start);
         }
-        // Calculate the correct substring length
         slength = std::min(len, s.len() - start);
         msize = slength + 5;
         cstr = new char[msize];
 
-        // Copy the substring safely
         std::memcpy(cstr, s.data() + start, slength);
         cstr[slength] = '\0'; // Null-terminate the new string
     }

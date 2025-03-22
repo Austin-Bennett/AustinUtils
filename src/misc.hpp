@@ -7,7 +7,6 @@
 #include <vector>
 #include <sstream>
 #include <io.h>
-#include <windows.h>
 #include <limits>
 
 #define AUSTINUTILS __declspec(dllexport)
@@ -65,6 +64,8 @@ namespace AustinUtils {
         return os;
     }
 
+#ifdef _WINDOWS_
+
     const static UINT og_console_CP = GetConsoleCP();
 
     inline void SetConsoleUTFMode(const bool value) {
@@ -76,7 +77,7 @@ namespace AustinUtils {
             SetConsoleOutputCP(og_console_CP);
         }
     }
-
+#endif
 
     typedef uint8_t u8;
     typedef uint16_t u16;

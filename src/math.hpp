@@ -23,7 +23,7 @@ namespace AustinUtils {
 
 
 
-    class complex;
+
 
     template<typename T>
     concept Arithmetic = std::is_arithmetic_v<T>;
@@ -92,18 +92,17 @@ namespace AustinUtils {
 
         static v2<T> of(radians theta, double magnitude);
         static v2<T> of_deg(arcdegrees theta, double magnitude);
-        static v2<double> from(complex c);
         double length();
         double length2();
         radians direction();
         arcdegrees direction_deg();
-        v2<T> reversed();
+        v2<T> reversed() const;
         v2<T> &reverse() {
             this.x *= -1;
             this.y *= -1;
             return *this;
         }
-        v2<T> normalized();
+        v2<T> normalized() const;
         v2<T> &normalize() {
             double invroot = 1/length();
             x *= invroot;
@@ -269,11 +268,11 @@ namespace AustinUtils {
         return toDeg(atan(y/x));
     }
 
-    arT v2<T> v2<T>::reversed() {
+    arT v2<T> v2<T>::reversed() const {
         return {-x, -y};
     }
 
-    arT v2<T> v2<T>::normalized() {
+    arT v2<T> v2<T>::normalized() const {
         double invrt = 1.0 / length();
         return {x*invrt, y*invrt};
     }
@@ -401,23 +400,23 @@ namespace AustinUtils {
             ret -= center;
 
             // Step 2: Rotate around the Z-axis (roll)
-            float cos_z = cos(zrot);
-            float sin_z = sin(zrot);
-            float temp_x = ret.x * cos_z - ret.y * sin_z;
-            float temp_y = ret.x * sin_z + ret.y * cos_z;
+            double cos_z = cos(zrot);
+            double sin_z = sin(zrot);
+            double temp_x = ret.x * cos_z - ret.y * sin_z;
+            double temp_y = ret.x * sin_z + ret.y * cos_z;
             ret.x = temp_x;
             ret.y = temp_y;
 
             // Step 3: Rotate around the Y-axis (yaw)
-            float cos_y = cos(yrot);
-            float sin_y = sin(yrot);
-            float temp_z = ret.z * cos_y - ret.x * sin_y;
+            double cos_y = cos(yrot);
+            double sin_y = sin(yrot);
+            double temp_z = ret.z * cos_y - ret.x * sin_y;
             ret.x = ret.x * cos_y + ret.z * sin_y;
             ret.z = temp_z;
 
             // Step 4: Rotate around the X-axis (pitch)
-            float cos_x = cos(xrot);
-            float sin_x = sin(xrot);
+            double cos_x = cos(xrot);
+            double sin_x = sin(xrot);
             temp_y = ret.y * cos_x - ret.z * sin_x;
             ret.z = ret.y * sin_x + ret.z * cos_x;
             ret.y = temp_y;
@@ -428,7 +427,7 @@ namespace AustinUtils {
             return ret;
         }
 
-        v3 rotated(v3<radians> rotator, v3 center) {
+        v3 rotated(v3<radians> rotator, v3 center = {0, 0, 0}) {
             return rotated(rotator.x, rotator.y, rotator.z, center);
         }
 
@@ -436,7 +435,7 @@ namespace AustinUtils {
             return rotated(toRad(xrot), toRad(yrot), toRad(zrot));
         }
 
-        v3 rotated_deg(v3<arcdegrees> rotator, v3 center) {
+        v3 rotated_deg(v3<arcdegrees> rotator, v3 center = {0, 0, 0}) {
             return rotated_deg(rotator.x, rotator.y, rotator.z, center);
         }
 
@@ -445,7 +444,7 @@ namespace AustinUtils {
             return *this;
         }
 
-        v3& rotate(v3<radians> rotator, v3 center) {
+        v3& rotate(v3<radians> rotator, v3 center = {0, 0, 0}) {
             return rotate(rotator.x, rotator.y, rotator.z, center);
         }
 
@@ -453,7 +452,7 @@ namespace AustinUtils {
             return rotate(toRad(xrot), toRad(yrot), toRad(zrot), center);
         }
 
-        v3 rotate_deg(v3<radians> rotator, v3 center) {
+        v3 rotate_deg(v3<radians> rotator, v3 center = {0, 0, 0}) {
             return rotate_deg(rotator.x, rotator.y, rotator.z, center);
         }
 
@@ -639,78 +638,6 @@ namespace AustinUtils {
     typedef v3<long double> ldvec3;
 
 
-    class AUSTINUTILS complex {
-    public:
-        double a = 0.0;
-        double b = 0.0;
-
-
-        complex();
-        explicit complex(double real);
-        complex(double real, double imaginary);
-
-
-        complex conjugate() const;
-        bool is_real() const;
-        double magnitude() const;
-        double magnitude2() const;
-        radians direction() const;
-        arcdegrees direction_deg() const;
-
-        arT
-        void convert_if_real(T* buffer) {
-            if (is_real()) {
-                *buffer = a;
-            }
-        }
-
-        friend std::ostream& operator <<(std::ostream& os, complex self) {
-            if (self.is_real()) {
-                os << self.a;
-                return os;
-            }
-            if (self.b < 0) {
-                os << self.a << " - " << std::abs(self.b) << "i";
-                return os;
-            }
-            os << self.a << " + " << self.b << "i";
-            return os;
-        }
-
-
-
-        complex operator +(complex other) const;
-        complex operator +(double other) const;
-
-        complex operator -(complex other) const;
-        complex operator -(double other) const;
-        complex operator -() const;
-
-        complex operator *(complex other) const;
-        complex operator *(double other) const;
-
-        complex operator /(complex other) const;
-        complex operator /(double other) const;
-
-        complex& operator +=(complex other);
-        complex& operator +=(double other);
-
-        complex& operator -=(complex other);
-        complex& operator -=(double other);
-
-        complex& operator *=(complex other);
-        complex& operator *=(double other);
-
-        complex& operator /=(complex other);
-        complex& operator /=(double other);
-
-    };
-
-
-
-    extern AUSTINUTILS complex pow(complex z, double n);
-
-    extern AUSTINUTILS complex pow(complex z, complex w);
 
     template<Arithmetic T>
     #define ATp template<Arithmetic Tp>
@@ -857,11 +784,11 @@ namespace AustinUtils {
             dealloc();
         }
 
-        usize width() const {
+        [[nodiscard]] usize width() const {
             return columns;
         }
 
-        usize height() const {
+        [[nodiscard]] usize height() const {
             return rows;
         }
 
